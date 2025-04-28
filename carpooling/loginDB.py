@@ -6,8 +6,7 @@ c = conn.cursor()
 # Create table
 c.execute('''
     CREATE TABLE users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL,
+        username TEXT NOT NULL PRIMARY KEY,
         password TEXT NOT NULL,
         src TEXT,
         dst TEXT
