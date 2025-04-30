@@ -3,7 +3,7 @@ import string
 import sqlite3
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = '123'
 
 def get_db_connection():
     conn = sqlite3.connect('users.db')
@@ -58,7 +58,7 @@ def offer_ride():
         dst = request.form.get('destination').lower().strip()
         
         conn = get_db_connection()
-        conn.execute('UPDATE users set src = ? , dst = ? where username =?',  ( src, dst,session['username'] ) )
+        conn.execute('UPDATE users set src = ? , dst = ? , ride_completed = 1 where username =?',  ( src, dst,session['username'] ) )
         conn.commit()
         conn.close()
     return render_template('select_ride_route.html')
@@ -74,7 +74,7 @@ def request_ride():
         src = request.form.get('source').lower().strip()
         dst = request.form.get('destination').lower().strip()
         # alpha=list(string.ascii_uppercase)
-        place=['raidurg','hitechcity','durgam Cheruvu','madhapur','peddamma gudi','jubilee hills CheckPost','road no 5 jubilee hills','yusufguda',
+        place=['raidurg','hitech city','durgam Cheruvu','madhapur','peddamma gudi','jubilee hills CheckPost','road no 5 jubilee hills','yusufguda',
                'madhura nagar','ameerpet','begumpet','prakash nagar','rasoolpura','paradise','parade ground','secunderabad east'
                ,'mettuguda','tarnaka','habsiguda','ngri','stadium','uppal','nagole']
         
@@ -82,16 +82,19 @@ def request_ride():
         for i in range(23):
             d[place[i]] = i
         conn = get_db_connection()
-        res=conn.execute('SELECT username,src,dst FROM users ').fetchall()
+        res=conn.execute('SELECT username,src,dst,ride_completed FROM users ').fetchall()
         for row in res:
             source=row['src']
             current=row['username']
             destination=row['dst']
-            if (d[source] <= d[src] and d[destination] >= d[dst]) or (d[source] >= d[src] and d[destination] <= d[dst]) or (d[source] == src and d[destination] == dst):
-                output='RIDE MATCHED '
-                output2 = ' Your Ride Mate is ' + current
-                output3 = source.upper() +' --> '+ destination.upper()
-                break
+            status = row['ride_completed']
+            if status == 1:
+                if (source is not None and destination is not None):# and ((d[source] <= d[src] and d[destination] >= d[dst]) or (d[source] >= d[src] and d[destination] <= d[dst]) or (d[source] == src and d[destination] == dst) ):
+                    if d[source]<=d[src]<=d[destination]+1 and d[source]<=d[dst]<=d[destination]+1:
+                        output='RIDE MATCHED '
+                        output2 = ' Your Ride Mate is ' + current
+                        output3 = source.upper() +' --> '+ destination.upper()
+                        break
             else:
                 output='RIDE NOT MATCHED , TRY AGAIN LATER'
         conn.close()

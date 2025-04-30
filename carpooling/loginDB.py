@@ -9,8 +9,9 @@ c.execute('''
         username TEXT NOT NULL PRIMARY KEY,
         password TEXT NOT NULL,
         src TEXT,
-        dst TEXT
-    )
+        dst TEXT,
+        ride_completed INTEGER DEFAULT 0)
+    
 ''')
 
 conn.commit()
